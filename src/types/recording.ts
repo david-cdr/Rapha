@@ -1,3 +1,10 @@
+export interface AnalysisResults {
+  ejectionFraction: string;
+  endSystolicVolume: string;
+  endDiastolicVolume: string;
+  heartRate: string;
+}
+
 export interface Recording {
   id: string;
   patientId: string;
@@ -6,11 +13,5 @@ export interface Recording {
   thumbnail: string;
   originalVideo: string;
   analyzedVideo?: string;
-}
-
-export interface AnalysisResults {
-  ejectionFraction: string;
-  strokeVolume: string;
-  cardiacOutput: string;
-  heartRate: string;
+  analysisResults?: AnalysisResults;
 } 
