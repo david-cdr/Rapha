@@ -12,6 +12,6 @@ export interface Recording {
   name: string;
   thumbnail: string;
   originalVideo: string;
-  analyzedVideo?: string;
+  analyzedVideo: string;
   analysisResults?: AnalysisResults;
 } 
