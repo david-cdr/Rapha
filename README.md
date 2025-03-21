@@ -65,15 +65,49 @@ http://localhost:5173
 
 ### Adding Your Own Recordings
 
-1. Place your echocardiogram recordings in:
-   - Original videos: `src/assets/videos/original/`
-   - Analyzed videos: `src/assets/videos/analyzed/`
-   - Thumbnails: `src/assets/thumbnails/`
+First, create the necessary directories if they don't exist:
+
+```bash
+mkdir -p src/assets/videos/original
+mkdir -p src/assets/videos/analyzed
+mkdir -p src/assets/thumbnails
+```
+
+Then, add your media files:
+
+1. Place your media files in these directories:
+   ```
+   src/
+   ├── assets/
+       ├── videos/
+       │   ├── original/     # Place original echocardiogram videos here
+       │   │   ├── patient-001-2024-03-15-original.mp4
+       │   │   └── ...
+       │   │
+       │   └── analyzed/     # Place AI-analyzed videos here
+       │       ├── patient-001-2024-03-15-analyzed.mp4
+       │       └── ...
+       │
+       └── thumbnails/       # Place video thumbnails here
+           ├── patient-001-2024-03-15.jpg
+           └── ...
+   ```
 
 2. Follow the naming convention:
-   - Original: `patient-001-2024-03-15-original.mp4`
-   - Analyzed: `patient-001-2024-03-15-analyzed.mp4`
-   - Thumbnail: `patient-001-2024-03-15.jpg`
+   - Original videos: `patient-[ID]-[DATE]-original.mp4`
+   - Analyzed videos: `patient-[ID]-[DATE]-analyzed.mp4`
+   - Thumbnails: `patient-[ID]-[DATE].jpg`
+
+   Example:
+   ```
+   patient-001-2024-03-15-original.mp4
+   patient-001-2024-03-15-analyzed.mp4
+   patient-001-2024-03-15.jpg
+   ```
+
+3. Supported formats:
+   - Videos: MP4 format (H.264 codec recommended)
+   - Thumbnails: JPG or PNG format (recommended size: 320x240px)
 
 ## Building for Production
 

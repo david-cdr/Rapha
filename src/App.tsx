@@ -10,7 +10,7 @@ const mockRecordings: Recording[] = [
     date: '2024-03-12',
     name: '0X1002E8FBACD08477',
     thumbnail: '/src/assets/thumbnails/patient-001-2024-03-12.jpg',
-    originalVideo: '/src/assets/videos/original/patient-001-2024-03-12-original.mp4',
+    originalVideo: '/src/assets/videos/original/dynamic_1.mp4',
     analyzedVideo: '/src/assets/videos/analyzed/patient-001-2024-03-12-analyzed.mp4',
     analysisResults: {
       ejectionFraction: '59%',
@@ -25,7 +25,7 @@ const mockRecordings: Recording[] = [
     date: '2024-03-11',
     name: '0X10099BA0A0B8A2A7',
     thumbnail: '/src/assets/thumbnails/patient-002-2024-03-11.jpg',
-    originalVideo: '/src/assets/videos/original/patient-002-2024-03-11-original.mp4',
+    originalVideo: '/src/assets/videos/original/dynamic_1.avi',
     analyzedVideo: '/src/assets/videos/analyzed/patient-002-2024-03-11-analyzed.mp4',
     analysisResults: {
       ejectionFraction: '25%',
