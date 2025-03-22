@@ -6,12 +6,16 @@ interface SidebarProps {
   recordings: Recording[]
   selectedId: string | null
   onSelect: (id: string) => void
+  onLogoClick: () => void
 }
 
-export function Sidebar({ recordings, selectedId, onSelect }: SidebarProps) {
+export function Sidebar({ recordings, selectedId, onSelect, onLogoClick }: SidebarProps) {
   return (
     <div className="w-72 bg-slate-900 shadow-lg overflow-y-auto border-r border-slate-700">
-      <div className="py-8 px-8 border-b border-slate-700">
+      <div 
+        className="py-8 px-8 border-b border-slate-700 cursor-pointer"
+        onClick={onLogoClick}
+      >
         <img src={raphaLogo} alt="Rapha" className="h-12" />
       </div>
       <div className="space-y-4 p-4">

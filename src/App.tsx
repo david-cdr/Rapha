@@ -3,6 +3,7 @@ import { mockRecordings } from './data/mockRecordings'
 import { Sidebar } from './components/layout/Sidebar'
 import { VideoPlayer } from './components/recording/VideoPlayer'
 import { AnalysisResults } from './components/recording/AnalysisResults'
+import { EmailSignup } from './components/layout/EmailSignup'
 import { useAnalysis } from './hooks/useAnalysis'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           setSelectedRecording(id)
           resetAnalysis()
         }}
+        onLogoClick={() => setSelectedRecording(null)}
       />
 
       <div className="flex-1 overflow-y-auto bg-gray-50">
@@ -49,7 +51,10 @@ function App() {
                   d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-xl text-gray-600">Pick a recording for analysis</p>
+              <p className="text-xl text-gray-600 mb-16">Pick a recording for analysis</p>
+              <div className="w-full max-w-2xl">
+                <EmailSignup />
+              </div>
             </div>
           ) : (
             <div className="pb-12">
