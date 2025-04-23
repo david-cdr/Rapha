@@ -5,229 +5,162 @@ interface Props {
 }
 
 export function AnalysisResults({ results }: Props) {
-  // Calculate risk scores based on measurements
-  const calculateRisks = () => {
-    const risks = {
-      cardiovascularRisk: 0,
-      heartFailureRisk: 0,
-      valveDiseaseRisk: 0
-    }
+  // Dashboard Risk Assessment Component
+  const DashboardRiskAssessment = () => {
+    const ef = parseFloat(results.ejectionFraction);
+    const gls = parseFloat(results.globalLongitudinalStrain);
 
-    // Cardiovascular risk based on EF, GLS, and wall motion
-    const ef = parseFloat(results.ejectionFraction)
-    const gls = Math.abs(parseFloat(results.globalLongitudinalStrain))
-    const wallMotion = parseFloat(results.leftVentricularWallMotionAbnormalities)
-    
-    risks.cardiovascularRisk = Math.min(100, Math.max(0,
-      (ef < 30 ? 40 : ef < 40 ? 25 : ef < 50 ? 15 : 0) +
-      (gls < 12 ? 30 : gls < 16 ? 15 : 0) +
-      (wallMotion > 0.7 ? 30 : wallMotion > 0.3 ? 15 : 0)
-    ))
+    const getEFStatus = (value: number) => {
+      if (value >= 50) return { status: 'Normal', color: 'bg-green-100 text-green-800 border-green-200', severity: 1 };
+      if (value >= 40) return { status: 'Mildly Reduced', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', severity: 2 };
+      return { status: 'Reduced', color: 'bg-red-100 text-red-800 border-red-200', severity: 3 };
+    };
 
-    // Heart failure risk based on volumes and function
-    const lvedv = parseFloat(results.leftVentricularEndDiastolicVolume)
-    const lvef = parseFloat(results.ejectionFraction)
-    
-    risks.heartFailureRisk = Math.min(100, Math.max(0,
-      (lvedv > 200 ? 30 : lvedv > 150 ? 15 : 0) +
-      (lvef < 30 ? 40 : lvef < 40 ? 25 : lvef < 50 ? 15 : 0) +
-      (gls < 12 ? 20 : gls < 16 ? 10 : 0)
-    ))
+    const getGLSStatus = (value: number) => {
+      if (Math.abs(value) >= 16) return { status: 'Normal', color: 'bg-green-100 text-green-800 border-green-200', severity: 1 };
+      if (Math.abs(value) >= 12) return { status: 'Mildly Reduced', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', severity: 2 };
+      return { status: 'Reduced', color: 'bg-red-100 text-red-800 border-red-200', severity: 3 };
+    };
 
-    // Valve disease risk based on various measurements
-    const eaRatio = parseFloat(results.eaRatio)
-    risks.valveDiseaseRisk = Math.min(100, Math.max(0,
-      (eaRatio > 15 ? 35 : eaRatio > 10 ? 20 : 0) +
-      (lvedv > 200 ? 25 : lvedv > 150 ? 15 : 0) +
-      (lvef < 40 ? 25 : lvef < 50 ? 15 : 0)
-    ))
+    const efAssessment = getEFStatus(ef);
+    const glsAssessment = getGLSStatus(gls);
+    const overallSeverity = Math.max(efAssessment.severity, glsAssessment.severity);
 
-    return risks
-  }
-
-  const risks = calculateRisks()
-
-  // Clinical Assessment Component
-  const ClinicalAssessment = ({ 
-    measurements, 
-    label, 
-    type 
-  }: { 
-    measurements: any,
-    label: string, 
-    type: 'lvSize' | 'systolicFunction' | 'rvSize' | 'laSize' 
-  }) => {
-    const getMeasurementDetails = () => {
-      switch(type) {
-        case 'lvSize':
-          return {
-            primary: {
-              name: 'LVIDd',
-              value: results.leftVentricularInternalDimensionDiastolic,
-              unit: 'cm',
-              ranges: [
-                { max: 5.2, status: 'normal' },
-                { max: 5.9, status: 'mild' },
-                { max: 999, status: 'severe' }
-              ]
-            },
-            secondary: {
-              name: 'LVEDV',
-              value: results.leftVentricularEndDiastolicVolume,
-              unit: 'mL',
-              ranges: [
-                { max: 150, status: 'normal' },
-                { max: 200, status: 'mild' },
-                { max: 999, status: 'severe' }
-              ]
-            }
-          };
-        
-        case 'systolicFunction':
-          return {
-            primary: {
-              name: 'EF',
-              value: results.ejectionFraction,
-              unit: '%',
-              ranges: [
-                { min: 50, max: 70, status: 'normal' },
-                { min: 40, max: 49, status: 'mild' },
-                { max: 39, status: 'severe' }
-              ]
-            },
-            secondary: {
-              name: 'GLS',
-              value: results.globalLongitudinalStrain,
-              unit: '%',
-              ranges: [
-                { min: -20, max: -16, status: 'normal' },
-                { min: -15, max: -12, status: 'mild' },
-                { max: -11, status: 'severe' }
-              ]
-            }
-          };
-        
-        case 'rvSize':
-          return {
-            primary: {
-              name: 'RVIDd',
-              value: results.rightVentricularInternalDimensionDiastolic,
-              unit: 'cm',
-              ranges: [
-                { max: 4.2, status: 'normal' },
-                { max: 4.8, status: 'mild' },
-                { max: 999, status: 'severe' }
-              ]
-            },
-            secondary: {
-              name: 'TAPSE',
-              value: results.tricuspidAnnularPlaneSystolicExcursion,
-              unit: 'cm',
-              ranges: [
-                { min: 1.7, status: 'normal' },
-                { min: 1.5, max: 1.69, status: 'mild' },
-                { max: 1.49, status: 'severe' }
-              ]
-            }
-          };
-        
-        case 'laSize':
-          return {
-            primary: {
-              name: 'LAVi',
-              value: results.leftAtrialVolume,
-              unit: 'mL',
-              ranges: [
-                { max: 34, status: 'normal' },
-                { max: 41, status: 'mild' },
-                { max: 999, status: 'severe' }
-              ]
-            },
-            secondary: {
-              name: 'LAD',
-              value: results.leftAtrialInternalDimension,
-              unit: 'cm',
-              ranges: [
-                { max: 4.0, status: 'normal' },
-                { max: 4.5, status: 'mild' },
-                { max: 999, status: 'severe' }
-              ]
-            }
-          };
+    const getRiskLevel = () => {
+      switch(overallSeverity) {
+        case 1: return { text: 'Low Risk', icon: '✓', color: 'text-green-500' };
+        case 2: return { text: 'Moderate Risk', icon: '!', color: 'text-yellow-500' };
+        case 3: return { text: 'High Risk', icon: '⚠', color: 'text-red-500' };
+        default: return { text: 'High Risk', icon: '⚠', color: 'text-red-500' }; // Safest default
       }
     };
 
-    const details = getMeasurementDetails();
-    
-    const getStatusColor = (value: number, ranges: any[]) => {
-      for (const range of ranges) {
-        if (range.min !== undefined && range.max !== undefined) {
-          if (value >= range.min && value <= range.max) return range.status;
-        } else if (range.min !== undefined) {
-          if (value >= range.min) return range.status;
-        } else if (range.max !== undefined) {
-          if (value <= range.max) return range.status;
-        }
-      }
-      return 'severe';
-    };
-
-    const getStatusStyles = (status: string) => {
-      switch(status) {
-        case 'normal':
-          return 'bg-green-100 text-green-800 border-green-200';
-        case 'mild':
-          return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'severe':
-          return 'bg-red-100 text-red-800 border-red-200';
-      }
-    };
-
-    const renderMeasurement = (measurement: any) => {
-      const value = parseFloat(measurement.value);
-      const status = getStatusColor(value, measurement.ranges);
-      const statusStyles = getStatusStyles(status);
-
-      return (
-        <div className="flex flex-col">
-          <div className="text-sm font-medium text-gray-600 mb-1">
-            {measurement.name}
-          </div>
-          <div className={`flex items-center justify-between p-3 rounded-lg border ${statusStyles}`}>
-            <div className="text-lg font-bold">
-              {value.toFixed(1)}{measurement.unit}
-            </div>
-            <div className="text-sm font-medium capitalize ml-3">
-              {status}
-            </div>
-          </div>
-          <div className="mt-1 text-xs text-gray-500">
-            {measurement.ranges.map((range: any, index: number) => (
-              <span key={index} className="mr-2">
-                {range.min !== undefined && range.max !== undefined
-                  ? `${range.min}-${range.max}`
-                  : range.min !== undefined
-                  ? `≥${range.min}`
-                  : `≤${range.max}`}
-                {measurement.unit} = {range.status}
-              </span>
-            ))}
-          </div>
-        </div>
-      );
-    };
+    const riskLevel = getRiskLevel();
 
     return (
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-4">
-          {label}
-          <span className="block text-xs text-gray-500 mt-1">
-            Key measurements and their clinical significance
-          </span>
-        </h4>
-        <div className="space-y-4">
-          {renderMeasurement(details.primary)}
-          {renderMeasurement(details.secondary)}
+      <div className="flex items-center space-x-8">
+        {/* Large Risk Indicator */}
+        <div className={`flex-1 flex items-center ${riskLevel.color}`}>
+          <div className="text-5xl font-bold mr-4">{riskLevel.icon}</div>
+          <div>
+            <div className="text-2xl font-bold">{riskLevel.text}</div>
+            <div className="text-sm text-gray-500">Systolic Function Status</div>
+          </div>
+        </div>
+
+        {/* Key Metrics */}
+        <div className="flex-1 grid grid-cols-2 gap-4">
+          <div className={`p-4 rounded-lg ${efAssessment.color} flex flex-col items-center justify-center`}>
+            <div className="text-3xl font-bold">{ef.toFixed(0)}%</div>
+            <div className="text-sm font-medium mt-1">EF</div>
+          </div>
+          <div className={`p-4 rounded-lg ${glsAssessment.color} flex flex-col items-center justify-center`}>
+            <div className="text-3xl font-bold">{gls.toFixed(1)}%</div>
+            <div className="text-sm font-medium mt-1">GLS</div>
+          </div>
+        </div>
+
+        {/* Risk Progress */}
+        <div className="flex-1">
+          <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-500 ${
+                overallSeverity === 1 
+                  ? 'bg-green-500 w-1/3' 
+                  : overallSeverity === 2 
+                  ? 'bg-yellow-500 w-2/3' 
+                  : 'bg-red-500 w-full'
+              }`}
+            />
+          </div>
+          <div className="mt-2 text-sm text-gray-500 flex justify-between">
+            <span>Low</span>
+            <span>Moderate</span>
+            <span>High</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Systolic Function Assessment Component
+  const SystolicFunctionAssessment = () => {
+    const ef = parseFloat(results.ejectionFraction);
+    const gls = parseFloat(results.globalLongitudinalStrain);
+
+    const getEFStatus = (value: number) => {
+      if (value >= 50) return { status: 'Normal', color: 'bg-green-100 text-green-800 border-green-200', severity: 1 };
+      if (value >= 40) return { status: 'Mildly Reduced', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', severity: 2 };
+      return { status: 'Reduced', color: 'bg-red-100 text-red-800 border-red-200', severity: 3 };
+    };
+
+    const getGLSStatus = (value: number) => {
+      if (Math.abs(value) >= 16) return { status: 'Normal', color: 'bg-green-100 text-green-800 border-green-200', severity: 1 };
+      if (Math.abs(value) >= 12) return { status: 'Mildly Reduced', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', severity: 2 };
+      return { status: 'Reduced', color: 'bg-red-100 text-red-800 border-red-200', severity: 3 };
+    };
+
+    const efAssessment = getEFStatus(ef);
+    const glsAssessment = getGLSStatus(gls);
+    const overallSeverity = Math.max(efAssessment.severity, glsAssessment.severity);
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-gray-50 rounded-lg p-6">
+          <h4 className="text-base font-medium text-gray-900 mb-4">Systolic Function Risk Profile</h4>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-600">Overall Status</div>
+                <div className={`mt-1 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                  overallSeverity === 1
+                    ? 'bg-green-100 text-green-800'
+                    : overallSeverity === 2
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {overallSeverity === 1
+                    ? 'Low Risk'
+                    : overallSeverity === 2
+                    ? 'Moderate Risk'
+                    : 'High Risk'}
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${
+                        overallSeverity === 1
+                          ? 'bg-green-500 w-1/3'
+                          : overallSeverity === 2
+                          ? 'bg-yellow-500 w-2/3'
+                          : 'bg-red-500 w-full'
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-lg p-4 border">
+                <div className="text-sm font-medium text-gray-600">EF Status</div>
+                <div className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${efAssessment.color}`}>
+                  {efAssessment.status}
+                </div>
+                <div className="mt-2 text-2xl font-bold text-gray-900">{ef.toFixed(1)}%</div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 border">
+                <div className="text-sm font-medium text-gray-600">GLS Status</div>
+                <div className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${glsAssessment.color}`}>
+                  {glsAssessment.status}
+                </div>
+                <div className="mt-2 text-2xl font-bold text-gray-900">{gls.toFixed(1)}%</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -236,38 +169,9 @@ export function AnalysisResults({ results }: Props) {
   return (
     <div className="mt-8 space-y-6">
       {/* Risk Assessment */}
-      <div className="bg-gradient-to-br from-indigo-50 to-white rounded-xl shadow-lg p-8 border border-indigo-100">
-        <h3 className="text-2xl font-bold text-indigo-900 mb-6 flex items-center">
-          <svg 
-            className="w-8 h-8 mr-3 text-indigo-600" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
-            />
-          </svg>
-          Risk Assessment
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <RiskCard
-            label="Cardiovascular Event Risk"
-            value={risks.cardiovascularRisk}
-          />
-          <RiskCard
-            label="Heart Failure Risk"
-            value={risks.heartFailureRisk}
-          />
-          <RiskCard
-            label="Valve Disease Risk"
-            value={risks.valveDiseaseRisk}
-          />
-        </div>
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Assessment</h3>
+        <DashboardRiskAssessment />
       </div>
 
       {/* Left Ventricle Analysis */}
@@ -316,17 +220,8 @@ export function AnalysisResults({ results }: Props) {
           />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ClinicalAssessment
-            measurements={results.leftVentricularSize}
-            label="Left Ventricle Size Assessment"
-            type="lvSize"
-          />
-          <ClinicalAssessment
-            measurements={results.leftVentricularSystolicFunction}
-            label="Systolic Function Assessment"
-            type="systolicFunction"
-          />
+        <div className="mt-6">
+          <SystolicFunctionAssessment />
         </div>
       </div>
 
@@ -353,14 +248,6 @@ export function AnalysisResults({ results }: Props) {
             label="RV Systolic Function"
             value={results.rightVentricularSystolicFunction}
             unit=""
-          />
-        </div>
-
-        <div className="mt-6">
-          <ClinicalAssessment
-            measurements={results.rightVentricularSize}
-            label="Right Ventricle Assessment"
-            type="rvSize"
           />
         </div>
       </div>
@@ -390,14 +277,6 @@ export function AnalysisResults({ results }: Props) {
             unit="cm"
           />
         </div>
-
-        <div className="mt-6">
-          <ClinicalAssessment
-            measurements={results.leftAtrialSize}
-            label="Left Atrial Assessment"
-            type="laSize"
-          />
-        </div>
       </div>
 
       {/* Pericardial Analysis */}
@@ -410,51 +289,9 @@ export function AnalysisResults({ results }: Props) {
             unit="%"
           />
         </div>
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <div className="text-sm text-gray-600">
-            Effusion Assessment: {' '}
-            <span className="font-medium">
-              {parseFloat(results.pericardialEffusion) > 0.05 
-                ? 'Significant effusion present' 
-                : parseFloat(results.pericardialEffusion) > 0.01
-                ? 'Mild effusion present'
-                : 'No significant effusion'}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
-  )
-}
-
-interface RiskCardProps {
-  label: string
-  value: number
-}
-
-function RiskCard({ label, value }: RiskCardProps) {
-  const getColor = (value: number) => {
-    if (value < 30) return 'bg-green-100 text-green-800'
-    if (value < 70) return 'bg-yellow-100 text-yellow-800'
-    return 'bg-red-100 text-red-800'
-  }
-
-  return (
-    <div className="bg-white/80 backdrop-blur rounded-lg p-5 shadow-sm">
-      <div className="text-base font-medium text-gray-700 mb-2">{label}</div>
-      <div className="mt-2">
-        <div className="w-full bg-gray-200 rounded-full h-3">
-          <div
-            className="h-3 rounded-full bg-indigo-600 transition-all duration-500"
-            style={{ width: `${value}%` }}
-          ></div>
-        </div>
-        <div className={`mt-2 text-sm font-semibold ${getColor(value)} rounded-lg px-3 py-1 inline-block`}>
-          {value}%
-        </div>
-      </div>
-    </div>
-  )
+  );
 }
 
 interface MetricCardProps {
