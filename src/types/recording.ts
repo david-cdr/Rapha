@@ -1,31 +1,40 @@
 export interface AnalysisResults {
-  // Basic Measurements
+  // Left Ventricle Measurements
   ejectionFraction: string;
-  endSystolicVolume: string;
-  endDiastolicVolume: string;
-  heartRate: string;
-  
-  // Additional Cardiac Function
-  strokeVolume: string;
-  cardiacOutput: string;
-  wallMotionScore: string;
-  myocardialMass: string;
-  
-  // Chamber Measurements
-  leftAtrialVolume: string;
-  rightVentricularFunction: string;
+  globalLongitudinalStrain: string;
+  leftVentricularEndDiastolicVolume: string;
+  leftVentricularEndSystolicVolume: string;
+  leftVentricularStrokeVolume: string;
+  leftVentricularSize: string[];
+  leftVentricularWallThickness: {
+    any: string;
+    moderateSevere: string;
+  };
+  leftVentricularSystolicFunction: string[];
+  leftVentricularWallMotionAbnormalities: string;
+  interventricularSeptumThickness: string;
+  leftVentricularPosteriorWallThickness: string;
+  leftVentricularInternalDimensionSystolic: string;
+  leftVentricularInternalDimensionDiastolic: string;
+  leftVentricularDiastolicFunction: string[];
   eaRatio: string;
-  eeRatio: string;
-  
-  // Dynamic Measurements
-  strainRate: string;
-  wallMotionVelocity: string;
-  ventricularSynchrony: string;
-  
-  // Risk Scores (0-100)
-  cardiovascularRisk: string;
-  heartFailureRisk: string;
-  valveDiseaseRisk: string;
+
+  // Right Ventricle Measurements
+  rightVentricularSize: string[];
+  rightVentricularSystolicFunction: string;
+  rightVentricularInternalDimensionDiastolic: string;
+  tricuspidAnnularPlaneSystolicExcursion: string;
+  rightVentricularSystolicVelocity: string;
+
+  // Atrial Measurements
+  leftAtrialSize: string[];
+  leftAtrialInternalDimension: string;
+  leftAtrialVolume: string;
+  rightAtrialSize: string;
+  rightAtrialDimension: string;
+
+  // Pericardial Measurements
+  pericardialEffusion: string;
 }
 
 export interface Recording {
