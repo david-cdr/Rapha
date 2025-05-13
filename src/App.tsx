@@ -5,26 +5,62 @@ import { VideoPlayer } from './components/recording/VideoPlayer'
 import { AnalysisResults } from './components/recording/AnalysisResults'
 import { EmailSignup } from './components/layout/EmailSignup'
 import { useAnalysis } from './hooks/useAnalysis'
+import type { Recording } from './types/recording'
 
 function App() {
+  const [recordings, setRecordings] = useState<Recording[]>(mockRecordings)
   const [selectedRecording, setSelectedRecording] = useState<string | null>(null)
   const { isAnalyzing, analysisComplete, startAnalysis, resetAnalysis } = useAnalysis()
 
-  const selectedVideo = mockRecordings.find(r => r.id === selectedRecording)
+  const selectedVideo = recordings.find(r => r.id === selectedRecording)
   const videoSrc = selectedVideo 
     ? (analysisComplete ? selectedVideo.analyzedVideo : selectedVideo.originalVideo)
     : ''
 
+  const handleAddRecording = () => {
+    // Create a hidden file input element
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.mp4'
+    input.style.display = 'none'
+    document.body.appendChild(input)
+
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        // Clone the second patient's data for the new recording
+        const secondPatient = recordings[1]
+        const newRecording: Recording = {
+          ...secondPatient,
+          id: String(recordings.length + 1),
+          patientId: `P${String(recordings.length + 1).padStart(3, '0')}`,
+          date: new Date().toISOString().split('T')[0],
+          name: `Recording ${recordings.length + 1}`,
+          thumbnail: secondPatient.thumbnail,
+          originalVideo: secondPatient.originalVideo,
+          analyzedVideo: secondPatient.analyzedVideo,
+          analysisResults: secondPatient.analysisResults
+        }
+        setRecordings([...recordings, newRecording])
+      }
+      // Clean up
+      document.body.removeChild(input)
+    }
+
+    input.click()
+  }
+
   return (
     <div className="flex h-screen">
       <Sidebar
-        recordings={mockRecordings}
+        recordings={recordings}
         selectedId={selectedRecording}
         onSelect={(id) => {
           setSelectedRecording(id)
           resetAnalysis()
         }}
         onLogoClick={() => setSelectedRecording(null)}
+        onAddRecording={handleAddRecording}
       />
 
       <div className="flex-1 overflow-y-auto bg-gray-50">
